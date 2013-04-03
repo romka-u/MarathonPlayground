@@ -14,6 +14,7 @@ def run_judging(filename):
 				return "Compilation error."
 				
 			with open("run_test.bat", "w") as f:
+				print >>f, "@echo off"
 				print >>f, "cd testing"
 				for seed in open("seeds.txt", "r"):
 					if seed.strip():
@@ -21,9 +22,9 @@ def run_judging(filename):
 
 				for seed in open("seeds.txt", "r"):
 					if seed.strip():
-						print >>f, "java -jar SnowCleaningVis.jar -novis -seed {0} -exec 'solution.exe' > \"..\\logs\\{1}_seed_{0}.log\" 2>&1".format(seed.strip(), filename)
+						print >>f, "java -jar SnowCleaningVis.jar -novis -seed {0} -exec solution.exe > \"..\\logs\\{1}_seed_{0}.log\" 2>&1".format(seed.strip(), filename)
 
-			subprocess.Popen(["run_test.sh.bat"])
+			subprocess.Popen(["run_test.bat"])
 			return "Solution was compiled successfully, testing in process."
 		else:
 			outfile = join("testing", "solution")
