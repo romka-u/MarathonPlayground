@@ -1,0 +1,4 @@
+*.pyc
+seeds.txt
+submissions/*
+logs/*
