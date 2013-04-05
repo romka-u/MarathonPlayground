@@ -6,53 +6,46 @@ import subprocess, datetime
 def run_judging(filename):
 	print "Judging " + filename + "..."
 	try:
+		# init strings
 		if platform.system() == "Windows":
 			outfile = join("testing", "solution.exe")
-			try:
-				subprocess.check_call(["g++", join("submissions", filename), "-O2", "-o", outfile])
-			except:
-				return "Compilation error."
-				
 			script_name = "run_test_{}.bat".format(datetime.datetime.now().strftime("%Y%m%dT%H%M%S"))
-			with open(script_name, "w") as f:
-				print >>f, "@echo off"
-				print >>f, "cd testing"
-				for seed in open("seeds.txt", "r"):
-					if seed.strip():
-						print >>f, "echo \"Not judged yet.\" > \"..\\logs\\{1}_seed_{0}.log\"".format(seed.strip(), filename)
-
-				for seed in open("seeds.txt", "r"):
-					if seed.strip():
-						print >>f, "java -jar SnowCleaningVis.jar -novis -seed {0} -exec solution.exe > \"..\\logs\\{1}_seed_{0}.log\" 2>&1".format(seed.strip(), filename)
-
-				print >>f, "cd .."
-				print >>f, "del", script_name
-
-			subprocess.Popen([script_name])
+			header = "@echo off\ncd testing"
+			not_judged_str = "echo \"Not judged yet.\" > \"..\\logs\\{1}_seed_{0}.log\""
+			run_jar_str = "java -jar SnowCleaningVis.jar -novis -seed {0} -exec solution.exe > \"..\\logs\\{1}_seed_{0}.log\" 2>&1"
+			del_str = "del"
+			popen_list = [script_name]
 		else:
 			outfile = join("testing", "solution")
-			try:
-				subprocess.check_call(["g++", join("submissions", filename), "-O2", "-o", outfile])
-			except:
-				return "Compilation error."
-				
 			script_name = "run_test_{}.sh".format(datetime.datetime.now().strftime("%Y%m%dT%H%M%S"))
-			with open(script_name, "w") as f:
-				print >>f, "cd testing"
-				for seed in open("seeds.txt", "r"):
-					if seed.strip():
-						print >>f, "echo \"Not judged yet.\" > \"../logs/{1}_seed_{0}.log\"".format(seed.strip(), filename)
+			header = "cd testing"
+			not_judged_str = "echo \"Not judged yet.\" > \"../logs/{1}_seed_{0}.log\""
+			run_jar_str = "java -jar SnowCleaningVis.jar -novis -seed {0} -exec './solution' > \"../logs/{1}_seed_{0}.log\" 2>&1"
+			del_str = "rm"
+			popen_list = ["bash", "-e", script_name]
 
-				for seed in open("seeds.txt", "r"):
-					if seed.strip():
-						print >>f, "java -jar SnowCleaningVis.jar -novis -seed {0} -exec './solution' > \"../logs/{1}_seed_{0}.log\" 2>&1".format(seed.strip(), filename)
+		# main logic
+		try:
+			subprocess.check_call(["g++", join("submissions", filename), "-O2", "-o", outfile])
+		except:
+			return "Compilation error."
 
-				print >>f, "cd .."
-				print >>f, "rm", script_name
+		with open(script_name, "w") as f:
+			print >>f, header
+			for seed in open("seeds.txt", "r"):
+				if seed.strip():
+					print >>f, not_judged_str.format(seed.strip(), filename)
 
-			subprocess.Popen(["bash", "-e", script_name])
+			for seed in open("seeds.txt", "r"):
+				if seed.strip():
+					print >>f, run_jar_str.format(seed.strip(), filename)
 
-		return "Solution was compiled successfully, testing in process ({}).".format(script_name)
+			print >>f, "cd .."
+			print >>f, del_str, script_name
+
+		subprocess.Popen(popen_list)
+
+		return "Solution was compiled successfully, testing in process (testing script: {}).".format(script_name)
 			
 	except Exception, e:
 		print e
