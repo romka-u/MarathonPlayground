@@ -3,6 +3,8 @@ import platform
 from os.path import join
 import subprocess, datetime
 
+test_jar_name = "SnowCleaningVis.jar"
+
 def run_judging(filename):
 	print "Judging " + filename + "..."
 	try:
@@ -12,7 +14,7 @@ def run_judging(filename):
 			script_name = "run_test_{}.bat".format(datetime.datetime.now().strftime("%Y%m%dT%H%M%S"))
 			header = "@echo off\ncd testing"
 			not_judged_str = "echo \"Not judged yet.\" > \"..\\logs\\{1}_seed_{0}.log\""
-			run_jar_str = "java -jar SnowCleaningVis.jar -novis -seed {0} -exec solution.exe > \"..\\logs\\{1}_seed_{0}.log\" 2>&1"
+			run_jar_str = "java -jar {2} -novis -seed {0} -exec solution.exe > \"..\\logs\\{1}_seed_{0}.log\" 2>&1"
 			del_str = "del"
 			popen_list = [script_name]
 		else:
@@ -20,7 +22,7 @@ def run_judging(filename):
 			script_name = "run_test_{}.sh".format(datetime.datetime.now().strftime("%Y%m%dT%H%M%S"))
 			header = "cd testing"
 			not_judged_str = "echo \"Not judged yet.\" > \"../logs/{1}_seed_{0}.log\""
-			run_jar_str = "java -jar SnowCleaningVis.jar -novis -seed {0} -exec './solution' > \"../logs/{1}_seed_{0}.log\" 2>&1"
+			run_jar_str = "java -jar {2} -novis -seed {0} -exec './solution' > \"../logs/{1}_seed_{0}.log\" 2>&1"
 			del_str = "rm"
 			popen_list = ["bash", "-e", script_name]
 
@@ -38,14 +40,14 @@ def run_judging(filename):
 
 			for seed in open("seeds.txt", "r"):
 				if seed.strip():
-					print >>f, run_jar_str.format(seed.strip(), filename)
+					print >>f, run_jar_str.format(seed.strip(), filename, test_jar_name)
 
 			print >>f, "cd .."
 			print >>f, del_str, script_name
 
 		subprocess.Popen(popen_list)
 
-		return "Solution was compiled successfully, testing in process (testing script: {}).".format(script_name)
+		return "Solution was compiled successfully, testing in process (testing script: {0}).".format(script_name)
 			
 	except Exception, e:
 		print e
