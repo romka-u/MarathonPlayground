@@ -13,7 +13,7 @@ def td(s, attr=""):
 def score_cell(score, best, attr=""):
     head = "<td align=right %s>" % attr
     tail = "</td>"
-    body = "<font size=2>%.5f</font><br><font size=4>%.2f</font>" % (max(score, 0) / best, score)
+    body = "<font size=2>%.5f</font><br><font size=4>%.4f</font>" % (max(score, 0) / best, score)
 
     return head + body + tail
 
@@ -44,7 +44,7 @@ def calc_max_for_seeds(scores, submissions_list, seeds):
         for file in submissions_list:
             key = (file, seed)
             if key in scores:
-                if scores[key] is float:
+                if isinstance(scores[key], float):
                     max_for_seeds[seed] = max(max_for_seeds[seed], scores[key])
 
     return max_for_seeds
@@ -71,7 +71,7 @@ def get_submissions_table():
             comment = open(os.path.join("submissions", file + ".info"), "r").readline().strip()
         except:
             comment = ""
-        row = "<td><a href='/rejudge?src={}'>Rejudge</a></td><td><a href='/submissions?delete={}'>Delete</a></td><td>{}</td><td>{}</td><td>{}</td>".format(
+        row = "<td><a href='/rejudge?src={}'>Rejudge</a></td><td><a href='/submissions?delete={}'>Delete</a></td><td>{}</td><td>{}</td><td style='font-style: italic;'>{}</td>".format(
             file, file, dt.strftime("%d.%m %H:%M:%S"), tok[2], comment)
 
         results_cells = ""
@@ -83,7 +83,7 @@ def get_submissions_table():
                 if isinstance(scores[key], basestring):
                     results_cells += td(scores[key], "bgcolor=gray" if scores[key] == "???" else "")
                 else:
-                    file_res.append(max(scores[key], 0) / max_for_seeds[seed])
+                    file_res.append(max(scores[key], 0))
                     if scores[key] > max_for_seeds[seed] - 1e-6:
                         results_cells += score_cell(scores[key], max_for_seeds[seed], "bgcolor=green;")
                     else:
@@ -96,7 +96,7 @@ def get_submissions_table():
         else:
             overall = "N/A"
 
-        row += td(overall, "bgcolor=pink") + results_cells
+        row += td(overall, "bgcolor=#7EE") + results_cells
 
         table += tr(row)
 
