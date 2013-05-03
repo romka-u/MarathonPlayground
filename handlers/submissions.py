@@ -59,7 +59,7 @@ def get_submissions_table():
     table += tr("<th>Rejudge</th><th>Delete</th><th>Timestamp</th><th>Filename</th><th>Comment</th>" + \
         "<th>Overall</th>" + seeds_headers)
 
-    submissions_list = [file for file in os.listdir("submissions") if not file.endswith(".info")]
+    submissions_list = [file for file in os.listdir("submissions") if not file.endswith(".info")][::-1]
 
     scores = get_scores(submissions_list, seeds)
     max_for_seeds = calc_max_for_seeds(scores, submissions_list, seeds)
