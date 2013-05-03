@@ -10,33 +10,39 @@ def td(s, attr=""):
     head = "<td %s>" % attr
     return head + "%s</td>" % s
 
-def score_cell(score, best, attr=""):
+def score_cell(score, best, is_TL, attr=""):
     head = "<td align=right %s>" % attr
     tail = "</td>"
-    body = "<font size=2>%.5f</font><br><font size=4>%.4f</font>" % (max(score, 0) / best, score)
+    tl_string = "<font color=\"red\" face=verdana size=2 style='font-weight: bold'>TL</font>" if is_TL else ""
+    body = "<font size=2>%.5f</font>%s<br><font size=4>%.4f</font>" % (max(score, 0) / best, tl_string, score)
 
     return head + body + tail
 
 def tr(s):
     return "<tr>%s</tr>" % s
 
-def get_scores(submissions_list, seeds):
+def parse_logs(submissions_list, seeds):
     scores = defaultdict(int)
+    times = defaultdict(str)
 
     for file in submissions_list:
         for seed in seeds:
+            key = (file, seed)
             try:
                 found = False
-                for line in open("logs/%s_seed_%s.log" % (file, seed), "r"):
+                for line in open("logs/{}_seed_{}.log".format(*key), "r"):
                     if line.startswith("Score"):
-                        scores[(file, seed)] = float(line.split()[-1])
+                        scores[key] = float(line.split()[-1])
                         found = True
+                    if line.startswith("real"):
+                        times[key] = line.split()[-1]
                 if not found:
-                    scores[(file, seed)] = "???"
+                    scores[key] = "???"
+                    times[key] = "N/A"
             except:
                 pass
 
-    return scores
+    return scores, times
 
 def calc_max_for_seeds(scores, submissions_list, seeds):
     max_for_seeds = defaultdict(lambda: -10)
@@ -61,7 +67,7 @@ def get_submissions_table():
 
     submissions_list = [file for file in os.listdir("submissions") if not file.endswith(".info")][::-1]
 
-    scores = get_scores(submissions_list, seeds)
+    scores, times = parse_logs(submissions_list, seeds)
     max_for_seeds = calc_max_for_seeds(scores, submissions_list, seeds)
 
     for file in submissions_list:
@@ -80,14 +86,22 @@ def get_submissions_table():
         for seed in seeds:
             key = (file, seed)
             if key in scores:
+                title_param = ""
+                is_TL = False
+                if key in times and times[key] != 'N/A':
+                    title_param = "title='{0}' ".format(times[key])
+                    tm = map(float, times[key][:-1].split('m'))
+                    if tm[0] * 60 + tm[1] > 10:
+                        is_TL = True
+              
                 if isinstance(scores[key], basestring):
-                    results_cells += td(scores[key], "bgcolor=gray" if scores[key] == "???" else "")
+                    results_cells += td(scores[key], title_param + ("bgcolor=gray" if scores[key] == "???" else ""))
                 else:
                     file_res.append(max(scores[key], 0))
                     if scores[key] > max_for_seeds[seed] - 1e-6:
-                        results_cells += score_cell(scores[key], max_for_seeds[seed], "bgcolor=green;")
+                        results_cells += score_cell(scores[key], max_for_seeds[seed], is_TL, title_param + "bgcolor=green;")
                     else:
-                        results_cells += score_cell(scores[key], max_for_seeds[seed])
+                        results_cells += score_cell(scores[key], max_for_seeds[seed], is_TL, title_param)
             else:
                 results_cells += td("---")
 
