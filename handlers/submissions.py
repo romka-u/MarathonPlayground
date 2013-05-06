@@ -58,12 +58,12 @@ def calc_max_for_seeds(scores, submissions_list, seeds):
 
 
 def get_submissions_table():
-    table = "<table cellpadding=5 cellspacing=0 border=1>"
+    yield "<table cellpadding=5 cellspacing=0 border=1>"
 
     seeds = [line.strip() for line in open("seeds.txt", "r") if line.strip()]
     seeds_headers = "".join("<th>%s</th>" % x for x in seeds)
 
-    table += tr("<th>Rejudge</th><th>Delete</th><th>Timestamp</th><th>Filename</th><th>Comment</th>" + \
+    yield tr("<th>Rejudge</th><th>Delete</th><th>Timestamp</th><th>Filename</th><th>Comment</th>" + \
         "<th>Overall</th>" + seeds_headers)
 
     submissions_list = [file for file in os.listdir("submissions") if not file.endswith(".info")][::-1]
@@ -78,7 +78,7 @@ def get_submissions_table():
             comment = open(os.path.join("submissions", file + ".info"), "r").readline().strip()
         except:
             comment = ""
-        row = "<td><a href='/rejudge?src={}'>Rejudge</a></td><td><a href='/submissions?delete={}'>Delete</a></td><td>{}</td><td>{}</td><td style='font-style: italic;'>{}</td>".format(
+        yield "<tr><td><a href='/rejudge?src={}'>Rejudge</a></td><td><a href='/submissions?delete={}'>Delete</a></td><td>{}</td><td>{}</td><td style='font-style: italic;'>{}</td>".format(
             file, file, dt.strftime("%d.%m %H:%M:%S"), tok[2], comment)
 
         results_cells = ""
@@ -122,12 +122,11 @@ def get_submissions_table():
         else:
             overall = "N/A"
 
-        row += td(overall, "bgcolor=#7EE") + results_cells
+        yield td(overall, "bgcolor=#7EE") + results_cells
 
-        table += tr(row)
+        yield "</tr>"
 
-    table += "</table>"
-    return table
+    yield "</table>"
 
 def SubmissionsPage(env):
     
@@ -185,6 +184,7 @@ def SubmissionsPage(env):
 
     temp_file.close()
 
-    table = get_submissions_table();
+    yield top + page.format(message=message)
 
-    return top + page.format(message=message, table=table)
+    for token in get_submissions_table():
+        yield token

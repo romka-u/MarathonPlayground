@@ -7,5 +7,4 @@ page = """
 <p>Solution: <input type="file" name="file">Comment:<input type="text" name="comment"><input type="submit" value="Upload"></p>
 </form>
 <hr>
-{table}
 """
