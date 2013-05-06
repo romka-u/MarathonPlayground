@@ -13,8 +13,9 @@ def td(s, attr=""):
 def score_cell(score, best, is_TL, attr=""):
     head = "<td align=right %s>" % attr
     tail = "</td>"
-    tl_string = "<font color=\"red\" face=verdana size=2 style='font-weight: bold'>TL</font>" if is_TL else ""
-    body = "<font size=2>%.5f</font>%s<br><font size=4>%.4f</font>" % (max(score, 0) / best, tl_string, score)
+    # tl_string = "<font color=\"red\" face=verdana size=2 style='font-weight: bold'>TL</font>" if is_TL else ""
+    # body = "<font size=2>%.5f</font>%s<br><font size=4>%.4f</font>" % (tl_string, score)
+    body = "<font size=4>%.4f</font>" % (score)
 
     return head + body + tail
 
@@ -98,10 +99,21 @@ def get_submissions_table():
                     results_cells += td(scores[key], title_param + ("bgcolor=gray" if scores[key] == "???" else ""))
                 else:
                     file_res.append(max(scores[key], 0))
-                    if scores[key] > max_for_seeds[seed] - 1e-6:
-                        results_cells += score_cell(scores[key], max_for_seeds[seed], is_TL, title_param + "bgcolor=green;")
+                    coeff = scores[key] / max_for_seeds[seed]
+                    if coeff <= 0.8:
+                        bgcolor = "#dd0000"
                     else:
-                        results_cells += score_cell(scores[key], max_for_seeds[seed], is_TL, title_param)
+                        if coeff <= 0.9:
+                            d = int((coeff - 0.8) * 2210)
+                            bgcolor = "#dd{0}00".format(hex(d)[2:])
+                        else:
+                            if coeff >= 1.0 - 1e-6:
+                                bgcolor = "#00ff00"
+                            else:
+                                d = int((1.0 - coeff) * 2210)
+                                bgcolor = "#{0}dd00".format(hex(d)[2:])
+
+                    results_cells += score_cell(scores[key], max_for_seeds[seed], is_TL, title_param + "bgcolor={0}".format(bgcolor))
             else:
                 results_cells += td("---")
 
