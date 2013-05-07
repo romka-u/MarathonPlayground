@@ -1,5 +1,26 @@
 
 page = """
+
+<script type = "text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script type = "text/javascript">
+    $(document).ready(function()
+    {{
+        window.setInterval(function() {{
+            var jqxhr = $.ajax({{
+                        url: "http://localhost:8051/submissions",
+                        crossDomain: true}})
+                    .done(function(data) {{
+                              submissions = $("#submissions", '<div>' + data + '<div>')
+                              $("#submissions").replaceWith(submissions)
+                              //console.log("success " + submissions.html() );
+                          }})
+                    .fail(function() {{ console.log("error"); }})
+                    .always(function() {{ }});
+
+        }}, 3500);
+    }});
+</script>
+
 <h1>Submissions page</h1>
 <hr>
 <form enctype="multipart/form-data" action="http://localhost:8051/submissions" method="post">
@@ -8,3 +29,4 @@ page = """
 </form>
 <hr>
 """
+

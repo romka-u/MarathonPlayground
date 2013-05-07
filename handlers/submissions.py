@@ -61,7 +61,7 @@ def calc_max_for_seeds(scores, submissions_list, seeds):
 
 
 def get_submissions_table():
-    yield "<table cellpadding=5 cellspacing=0 border=1>"
+    yield "<table id='submissions' cellpadding=5 cellspacing=0 border=1>"
 
     seeds = [line.strip() for line in open("seeds.txt", "r") if line.strip()]
     seeds_headers = "".join("<th>%s</th>" % x for x in seeds)

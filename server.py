@@ -4,7 +4,7 @@ from handlers import *
 
 def application(environ, start_response):
     # use cgi module to read data
-    start_response('200 OK', [('Content-type','text/html')])
+    start_response('200 OK', [('Content-type','text/html'), ('Access-Control-Allow-Origin', '*')])
 
     route = environ['PATH_INFO']
     handler = MainPage
