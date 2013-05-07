@@ -99,7 +99,10 @@ def get_submissions_table():
                         is_TL = True
               
                 if isinstance(scores[key], basestring):
-                    results_cells += td(scores[key], title_param + ("bgcolor=gray" if scores[key] == "???" else ""))
+                    if scores[key] == "???":
+                        results_cells += td("<img src='http://localhost:8051/static/ajax-loader.gif'/>", "align=center")
+                    else:
+                        results_cells += td(scores[key])
                 else:
                     file_res.append(max(scores[key], 0))
                     coeff = scores[key] / max_for_seeds[seed]
