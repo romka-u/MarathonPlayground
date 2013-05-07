@@ -7,7 +7,7 @@ def application(environ, start_response):
 
     if route.startswith('/static'):
         route = route[1:]
-        filelike = open(route, "r")
+        filelike = open(route, "rb")
         block_size = 1024
         start_response('200 OK',[('Content-Type', 'image/gif')])
         if 'wsgi.file_wrapper' in environ:
