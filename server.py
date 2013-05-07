@@ -26,6 +26,8 @@ def application(environ, start_response):
             handler = ConfigPage
         if route == '/rejudge':
             handler = RejudgePage
+        if route == '/download':
+            handler = DownloadPage
 
         for item in handler(environ):
             yield item

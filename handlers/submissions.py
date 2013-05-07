@@ -82,7 +82,7 @@ def get_submissions_table():
         except:
             comment = ""
         yield "<tr><td><a href='/rejudge?src={}'>Rejudge</a></td><td><a href='/submissions?delete={}'>Delete</a></td><td>{}</td><td>{}</td><td style='font-style: italic;'>{}</td>".format(
-            file, file, dt.strftime("%d.%m %H:%M:%S"), tok[2], comment)
+            file, file, dt.strftime("%d.%m %H:%M:%S"), "<a href='/download?file={0}'>{1}</a>".format(file, tok[2]), comment)
 
         results_cells = ""
         file_res = []
