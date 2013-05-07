@@ -1,5 +1,7 @@
 import cgi, os
 
+from navigation_tmpl import top
+
 def gen_compare_table(file1, file2, compress):
     conv = lambda x: x.replace('\t', ' ' * 4).replace('<', '&lt;').replace('>', '&gt;')
 
@@ -95,6 +97,9 @@ def ComparePage(env):
     file2 = d['file2'][0] if 'file2' in d else ''
 
     submissions_list = [file for file in os.listdir("submissions") if not file.endswith(".info")][::-1]
+
+    yield top
+    yield "<h1>Compare page</h1><hr>"
 
     yield "<form action='http://localhost:8051/compare' method='get'>"
 
