@@ -25,6 +25,7 @@ def tr(s):
 def parse_logs(submissions_list, seeds):
     scores = defaultdict(int)
     times = defaultdict(str)
+    info = defaultdict(str)
 
     for file in submissions_list:
         for seed in seeds:
@@ -37,13 +38,15 @@ def parse_logs(submissions_list, seeds):
                         found = True
                     if line.startswith("real"):
                         times[key] = line.split()[-1]
+                    if line.startswith("!"):
+                        info[key] += "\n" + line.strip()[2:]
                 if not found:
                     scores[key] = "???"
                     times[key] = "N/A"
             except:
                 pass
 
-    return scores, times
+    return scores, times, info
 
 def calc_max_for_seeds(scores, submissions_list, seeds):
     max_for_seeds = defaultdict(lambda: -10)
@@ -68,7 +71,7 @@ def get_submissions_table():
 
     submissions_list = [file for file in os.listdir("submissions") if not file.endswith(".info")][::-1]
 
-    scores, times = parse_logs(submissions_list, seeds)
+    scores, times, info = parse_logs(submissions_list, seeds)
     max_for_seeds = calc_max_for_seeds(scores, submissions_list, seeds)
 
     for file in submissions_list:
@@ -90,7 +93,7 @@ def get_submissions_table():
                 title_param = ""
                 is_TL = False
                 if key in times and times[key] != 'N/A':
-                    title_param = "title='{0}' ".format(times[key])
+                    title_param = "title='{0}' ".format(times[key] + info[key])
                     tm = map(float, times[key][:-1].split('m'))
                     if tm[0] * 60 + tm[1] > 10:
                         is_TL = True
