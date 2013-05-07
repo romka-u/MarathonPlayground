@@ -28,6 +28,8 @@ def application(environ, start_response):
             handler = RejudgePage
         if route == '/download':
             handler = DownloadPage
+        if route == '/compare':
+            handler = ComparePage
 
         for item in handler(environ):
             yield item

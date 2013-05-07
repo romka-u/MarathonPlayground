@@ -3,3 +3,4 @@ from main import *
 from rejudge import *
 from submissions import *
 from download import *
+from compare import *
