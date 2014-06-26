@@ -4,7 +4,7 @@ from os.path import join
 import subprocess, datetime
 import random
 
-test_jar_name = "FragileMirrorsVis.jar"
+test_jar_name = "RectanglesAndHolesVis.jar"
 
 def run_judging(filename):
 	print "Judging " + filename + "..."
@@ -23,15 +23,15 @@ def run_judging(filename):
 			executable = "solution_{0}".format(filename.split("_")[0])
 			outfile = join("testing", executable)
 			script_name = "run_test_{}.sh".format(datetime.datetime.now().strftime("%Y%m%dT%H%M%S"))
-			header = "cd testing"
-			not_judged_str = "echo \"Not judged yet.\" > \"../logs/{1}_seed_{0}.log\""
-			run_jar_str = "bash -c \"time java -jar {2} -novis -seed {0} -exec './%s'\" >\"../logs/{1}_seed_{0}.log\" 2>&1" % executable
+			header = "cd testing\nPATH=/Users/rudovichenko/ts-0.7.3/:$PATH"
+			not_judged_str = "rm -f \"../logs/{1}_seed_{0}.log\""
+			run_jar_str = "ts -O \"../logs/{1}_seed_{0}.log\" bash -c \"time java -jar {2} -novis -seed {0} -exec './%s'\" 2>&1" % executable
 			del_str = "rm"
 			popen_list = ["bash", "-e", script_name]
 
 		# main logic
 		try:
-			subprocess.check_call(["g++", join("submissions", filename), "-O2", "-o", outfile])
+			subprocess.check_call(["clang++", "-std=c++11", join("submissions", filename), "-O2", "-o", outfile])
 		except:
 			return "Compilation error."
 
@@ -51,7 +51,7 @@ def run_judging(filename):
 		subprocess.Popen(popen_list)
 
 		return "Solution was compiled successfully, testing in process (testing script: {0}).".format(script_name)
-			
+
 	except Exception, e:
 		print e
 		print "Fail to judge " + filename

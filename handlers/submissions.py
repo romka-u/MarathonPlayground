@@ -15,7 +15,7 @@ def score_cell(score, best, is_TL, attr=""):
     tail = "</td>"
     # tl_string = "<font color=\"red\" face=verdana size=2 style='font-weight: bold'>TL</font>" if is_TL else ""
     # body = "<font size=2>%.5f</font>%s<br><font size=4>%.4f</font>" % (tl_string, score)
-    body = "<font size=4>%.4f</font>" % (score)
+    body = "<font size=3>{0}</font>".format(int(score))
 
     return head + body + tail
 
@@ -97,7 +97,7 @@ def get_submissions_table():
                     tm = map(float, times[key][:-1].split('m'))
                     if tm[0] * 60 + tm[1] > 10:
                         is_TL = True
-              
+
                 if isinstance(scores[key], basestring):
                     if scores[key] == "???":
                         results_cells += td("<img src='http://localhost:8051/static/ajax-loader.gif'/>", "align=center")
@@ -105,7 +105,10 @@ def get_submissions_table():
                         results_cells += td(scores[key])
                 else:
                     file_res.append(max(scores[key], 0))
-                    coeff = scores[key] / max_for_seeds[seed]
+                    try:
+                        coeff = scores[key] / max_for_seeds[seed]
+                    except:
+                        coeff = 0
                     if coeff <= 0.8:
                         bgcolor = "#dd0000"
                     else:
