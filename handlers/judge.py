@@ -1,57 +1,44 @@
-
-import platform
+import os
 from os.path import join
-import subprocess, datetime
-import random
+import subprocess
+from pool import ProcessPool
 
-test_jar_name = "RectanglesAndHolesVis.jar"
+test_jar_name = "./testing/CollageMakerVis.jar"
+
+def run_jar(filename, seed, executable):
+    log = "logs/{1}_seed_{0}.log".format(seed, filename)
+    subprocess.check_call(
+        "{{ /bin/bash -c 'time java -jar {jar} -novis -seed {seed} \
+                          -target ../300px -source ../100px \
+                          -exec {executable} 2>&1 >{log}' ; }} 2>>{log}".format(
+            log=log, executable=executable, seed=seed, jar=test_jar_name),
+        shell=True
+    )
 
 def run_judging(filename):
-	print "Judging " + filename + "..."
-	try:
-		# init strings
-		if platform.system() == "Windows":
-			executable = "solution_{0}".format(filename.split("_")[0])
-			outfile = join("testing", executable)
-			script_name = "run_test_{0}.bat".format(datetime.datetime.now().strftime("%Y%m%dT%H%M%S"))
-			header = "@echo off\ncd testing"
-			not_judged_str = "echo \"Not judged yet.\" > \"..\\logs\\{1}_seed_{0}.log\""
-			run_jar_str = "java -jar {2} -novis -seed {0} -exec %s >\"..\\logs\\{1}_seed_{0}.log\" 2>&1" % executable
-			del_str = "del"
-			popen_list = [script_name]
-		else:
-			executable = "solution_{0}".format(filename.split("_")[0])
-			outfile = join("testing", executable)
-			script_name = "run_test_{}.sh".format(datetime.datetime.now().strftime("%Y%m%dT%H%M%S"))
-			header = "cd testing\nPATH=/Users/rudovichenko/ts-0.7.3/:$PATH"
-			not_judged_str = "rm -f \"../logs/{1}_seed_{0}.log\""
-			run_jar_str = "ts -O \"../logs/{1}_seed_{0}.log\" bash -c \"time java -jar {2} -novis -seed {0} -exec './%s'\" 2>&1" % executable
-			del_str = "rm"
-			popen_list = ["bash", "-e", script_name]
+    print "Judging " + filename + "..."
+    try:
+        executable = join("testing", "solution_{0}".format(filename.split("_")[0]))
 
-		# main logic
-		try:
-			subprocess.check_call(["clang++", "-std=c++11", join("submissions", filename), "-O2", "-o", outfile])
-		except:
-			return "Compilation error."
+        try:
+            subprocess.check_call(["g++", "-std=c++0x", join("submissions", filename), "-O2", "-o", executable])
+        except Exception, e:
+            return "Compilation error: " + str(e)
 
-		with open(script_name, "w") as f:
-			print >>f, header
-			for seed in open("seeds.txt", "r"):
-				if seed.strip():
-					print >>f, not_judged_str.format(seed.strip(), filename)
+        with open("seeds.txt") as seeds_file:
+            seeds = filter(None, map(lambda s: s.strip(), seeds_file.readlines()))
 
-			for seed in open("seeds.txt", "r"):
-				if seed.strip():
-					print >>f, run_jar_str.format(seed.strip(), filename, test_jar_name)
+        for seed in seeds:
+            log = "logs/{1}_seed_{0}.log".format(seed, filename)
+            os.path.exists(log) and os.remove(log)
 
-			print >>f, "cd .."
-			print >>f, del_str, script_name
+        for seed in seeds:
+            ProcessPool.get_pool().apply_async(
+                run_jar, [filename, seed, executable])
 
-		subprocess.Popen(popen_list)
+        return "Solution was compiled successfully, testing in progress"
 
-		return "Solution was compiled successfully, testing in process (testing script: {0}).".format(script_name)
-
-	except Exception, e:
-		print e
-		print "Fail to judge " + filename
+    except Exception, e:
+        message = "Failed to judge " + filename + ": " + str(e)
+        print message
+        return message

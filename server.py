@@ -1,4 +1,5 @@
 from wsgiref.simple_server import make_server
+import handlers
 from handlers import *
 
 
@@ -33,5 +34,6 @@ def application(environ, start_response):
 
         for item in handler(environ):
             yield item
+
 
 make_server('localhost', 8051, application).serve_forever()
